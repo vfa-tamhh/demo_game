@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".app.SnackeApplication"
@@ -13,6 +17,27 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!-- プッシュ通知タップ時に起動するActivityの設定 ※必須の設定 -->
+        <meta-data
+            android:name="openPushStartActivity"
+            android:value=".MainActivity" />
+
+        <!-- 通知エリアに表示されるアイコンの設定 -->
+        <meta-data
+            android:name="smallIcon"
+            android:resource="@drawable/icon" />
+
+        <!-- 通知エリアに表示されるアイコンカラーの設定 -->
+        <meta-data
+            android:name="smallIconColor"
+            android:value="@color/colorAccent" />
+
+        <!-- 通知エリアにプッシュ通知を複数表示する設定　0:最新のみ表示 , 1:複数表示 -->
+        <meta-data
+            android:name="notificationOverlap"
+            android:value="0" />
+
         <activity android:name=".activity.SnakeActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -23,11 +48,21 @@
         </activity>
         <activity
             android:name=".activity.LoginActivity"
-            android:theme="@style/AppTheme.Dark"></activity>
+            android:theme="@style/AppTheme.Dark" />
         <activity
             android:name=".activity.SignupActivity"
             android:theme="@style/AppTheme.Dark" />
-        <activity android:name=".activity.BestScoreActivity"></activity>
+        <activity android:name=".activity.BestScoreActivity" />
+
+        <service
+            android:name="com.nifcloud.mbaas.core.NCMBFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity android:name=".activity.ProfileActivity"></activity>
     </application>
 
 </manifest>

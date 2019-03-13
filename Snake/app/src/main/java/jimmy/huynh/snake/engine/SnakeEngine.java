@@ -429,7 +429,7 @@ public class SnakeEngine extends SurfaceView implements Runnable {
     private void setScoreToServer() {
         NCMBObject obj = new NCMBObject("GameScore");
 
-        NCMBUser ncmbUser = Prefs.with(mContext).getUser();
+        NCMBUser ncmbUser = NCMBUser.getCurrentUser();
         //値を設定
         try {
             obj.put("name", ncmbUser.getObjectId());

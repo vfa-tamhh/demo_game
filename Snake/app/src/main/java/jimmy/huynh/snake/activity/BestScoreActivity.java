@@ -73,7 +73,7 @@ public class BestScoreActivity extends AppCompatActivity {
     private void getScore() {
         final List<Game> gameList = new ArrayList<>();
         NCMBQuery<NCMBObject> query = new NCMBQuery<>("GameScore");
-        NCMBUser ncmbUser = Prefs.with(getApplicationContext()).getUser();
+        NCMBUser ncmbUser = NCMBUser.getCurrentUser();
         query.whereEqualTo("name", ncmbUser.getObjectId());
         query.addOrderByDescending("score");
 

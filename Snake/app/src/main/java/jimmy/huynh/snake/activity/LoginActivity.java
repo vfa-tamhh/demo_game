@@ -72,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
     public void login() {
 
         if (!validate()) {
-            onLoginFailed();
+            onLoginFailed("Invalid input.");
             return;
         }
 
@@ -96,18 +96,18 @@ public class LoginActivity extends AppCompatActivity {
     public void onLoginSuccess(NCMBUser user) {
         _loginButton.setEnabled(true);
         Prefs.with(LoginActivity.this).setIsLogged(true);
-        Prefs.with(LoginActivity.this).setUserId(user);
-
-        Gson gson = new Gson();
-        String result = gson.toJson(user);
-        Intent returnIntent = new Intent();
-        returnIntent.putExtra("result", result);
-        setResult(MainActivity.RESULT_OK, returnIntent);
+//        Prefs.with(LoginActivity.this).setUserId(user);
+//
+//        Gson gson = new Gson();
+//        String result = gson.toJson(user);
+//        Intent returnIntent = new Intent();
+//        returnIntent.putExtra("result", result);
+        setResult(MainActivity.RESULT_OK);
         finish();
     }
 
-    public void onLoginFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+    public void onLoginFailed(String error) {
+        Toast.makeText(getBaseContext(), "Login failed: " + error, Toast.LENGTH_LONG).show();
 
         _loginButton.setEnabled(true);
     }
@@ -151,7 +151,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (e != null) {
                         //エラー時の処理
                         progressDialog.dismiss();
-                        onLoginFailed();
+                        onLoginFailed(e.getMessage());
 
                     } else {
                         new android.os.Handler().postDelayed(
@@ -178,15 +178,14 @@ public class LoginActivity extends AppCompatActivity {
             public void done(final NCMBUser user, NCMBException e) {
                 if (e != null) {
                     progressDialog.dismiss();
-                    onLoginFailed();
+                    onLoginFailed(e.getMessage());
                 } else {
                     new android.os.Handler().postDelayed(
                             new Runnable() {
                                 public void run() {
                                     // On complete call either onLoginSuccess or onLoginFailed
-                                    onLoginSuccess(user);
-                                    // onLoginFailed();
                                     progressDialog.dismiss();
+                                    onLoginSuccess(user);
                                 }
                             }, 3000);
                 }

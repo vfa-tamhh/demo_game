@@ -6,42 +6,51 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.signature.ObjectKey;
 import com.google.gson.Gson;
+import com.nifcloud.mbaas.core.NCMBException;
 import com.nifcloud.mbaas.core.NCMBUser;
 
 import jimmy.huynh.snake.activity.BestScoreActivity;
 import jimmy.huynh.snake.activity.LoginActivity;
+import jimmy.huynh.snake.activity.ProfileActivity;
 import jimmy.huynh.snake.activity.SnakeActivity;
 import jimmy.huynh.snake.app.Prefs;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button btnNewGame, btnBestScores, btnLogout;
-    private ImageButton btnImgProfile;
+    private ImageView btnImgProfile;
+    private TextView tvUserName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnNewGame = (Button) findViewById(R.id.btn_new_game);
-        btnBestScores = (Button) findViewById(R.id.btn_best_scores);
-        btnImgProfile = (ImageButton) findViewById(R.id.btn_profile);
-        btnLogout = (Button) findViewById(R.id.btn_logout);
+        btnNewGame = findViewById(R.id.btn_new_game);
+        btnBestScores = findViewById(R.id.btn_best_scores);
+        btnImgProfile = findViewById(R.id.btn_profile);
+        btnLogout = findViewById(R.id.btn_logout);
+        tvUserName = findViewById(R.id.tv_username);
 
         //Set event click
         btnNewGame.setOnClickListener(this);
         btnBestScores.setOnClickListener(this);
         btnImgProfile.setOnClickListener(this);
         btnLogout.setOnClickListener(this);
-
-        if (!Prefs.with(getBaseContext()).isLogged()) {
+        if (!Prefs.with(this).isLogged()) {
             login();
         } else {
             //Set init view
-            initWithUser(Prefs.with(getBaseContext()).getUser());
+            initWithUser(NCMBUser.getCurrentUser());
         }
 
     }
@@ -75,7 +84,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void profile() {
-
+        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+        startActivity(intent);
     }
 
     private void login() {
@@ -84,7 +94,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initWithUser(NCMBUser user) {
-        Toast.makeText(getBaseContext(), "Welcome " + user.getUserName() + " to snacke game.", Toast.LENGTH_LONG).show();
+        if (null != user.getUserName() && null != user.getMailAddress()) {
+            tvUserName.setText(user.getUserName() + " - " + user.getMailAddress());
+        } else if (null != user.getUserName()) {
+            tvUserName.setText(user.getUserName());
+        } else {
+            tvUserName.setText(user.getMailAddress());
+        }
+        String img = user.getString("Thumb");
+        if (img != null) {
+            loadImg(img);
+        }
+    }
+
+    private void loadImg(String img) {
+        img = img.trim();
+        Glide.with(MainActivity.this).load(img)
+                .placeholder(R.drawable.holder)
+                .fitCenter()
+                .circleCrop()
+                .signature(new ObjectKey(System.currentTimeMillis()))
+                .into(btnImgProfile);
     }
 
     @Override
@@ -92,9 +122,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (requestCode == 1) {
             if (resultCode == MainActivity.RESULT_OK) {
-                String result = data.getStringExtra("result");
-                Gson gson = new Gson();
-                NCMBUser ncmbUser = gson.fromJson(result, NCMBUser.class);
+
+                NCMBUser ncmbUser = NCMBUser.getCurrentUser();
                 initWithUser(ncmbUser);
             }
             if (resultCode == MainActivity.RESULT_CANCELED) {
@@ -104,7 +133,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }//onActivityResult
 
     private void logout() {
-        Prefs.with(getBaseContext()).setIsLogged(false);
+        try {
+            NCMBUser.logout();
+            Prefs.with(getBaseContext()).setIsLogged(false);
+        } catch (NCMBException e) {
+            e.printStackTrace();
+        }
         login();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (NCMBUser.getCurrentUser() != null) {
+            initWithUser(NCMBUser.getCurrentUser());
+        }
     }
 }
