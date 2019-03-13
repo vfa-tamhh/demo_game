@@ -1,10 +1,12 @@
 package jimmy.huynh.snake.activity;
 
+import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nifcloud.mbaas.core.DoneCallback;
@@ -29,13 +31,19 @@ public class BestScoreActivity extends AppCompatActivity {
     private GameAdapter gameAdapter;
     @BindView(R.id.rc_view)
     RecyclerView rc_score;
-    List<Game> games = new ArrayList<>();
+    @BindView(R.id.tv_info)
+    TextView tvInfo;
 
+    List<Game> games = new ArrayList<>();
+    private ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_best_score);
         ButterKnife.bind(this);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Loading...");
         getScore();
 
     }
@@ -55,6 +63,11 @@ public class BestScoreActivity extends AppCompatActivity {
                             } else {
                                 games.remove(position);
                                 gameAdapter.notifyDataSetChanged();
+                                if (games.size()> 0) {
+                                    tvInfo.setVisibility(View.GONE);
+                                } else {
+                                    tvInfo.setVisibility(View.VISIBLE);
+                                }
                             }
                         }
                     });
@@ -68,9 +81,11 @@ public class BestScoreActivity extends AppCompatActivity {
         gameAdapter.setListener(gameListener);
         rc_score.setAdapter(gameAdapter);
         rc_score.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+
     }
 
     private void getScore() {
+        progressDialog.show();
         final List<Game> gameList = new ArrayList<>();
         NCMBQuery<NCMBObject> query = new NCMBQuery<>("GameScore");
         NCMBUser ncmbUser = NCMBUser.getCurrentUser();
@@ -80,6 +95,7 @@ public class BestScoreActivity extends AppCompatActivity {
         query.findInBackground(new FindCallback<NCMBObject>() {
             @Override
             public void done(List<NCMBObject> results, NCMBException e) {
+                progressDialog.dismiss();
                 if (e != null) {
 
                     //検索失敗時の処理
@@ -91,6 +107,11 @@ public class BestScoreActivity extends AppCompatActivity {
                         gameList.add(game);
                     }
                     games = gameList;
+                    if (games.size()> 0) {
+                        tvInfo.setVisibility(View.GONE);
+                    } else {
+                        tvInfo.setVisibility(View.VISIBLE);
+                    }
                     initView();
                 }
             }

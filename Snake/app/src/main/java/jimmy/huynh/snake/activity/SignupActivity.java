@@ -61,7 +61,7 @@ public class SignupActivity extends AppCompatActivity {
     public void signup() {
 
         if (!validate()) {
-            onSignupFailed();
+            onSignupFailed("Invalid");
             return;
         }
 
@@ -87,8 +87,8 @@ public class SignupActivity extends AppCompatActivity {
         finish();
     }
 
-    public void onSignupFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+    public void onSignupFailed(String message) {
+        Toast.makeText(getBaseContext(), "Login failed: " + message, Toast.LENGTH_LONG).show();
 
         _signupButton.setEnabled(true);
     }
@@ -134,9 +134,10 @@ public class SignupActivity extends AppCompatActivity {
         user.signUpInBackground(new DoneCallback() {
             @Override
             public void done(NCMBException e) {
+                progressDialog.dismiss();
                 if (e != null) {
                     //会員登録時にエラーが発生した場合の処理
-                    onSignupFailed();
+                    onSignupFailed(e.getMessage());
                 } else {
                     new android.os.Handler().postDelayed(
                             new Runnable() {
@@ -145,7 +146,7 @@ public class SignupActivity extends AppCompatActivity {
                                     // depending on success
                                     onSignupSuccess();
                                     // onSignupFailed();
-                                    progressDialog.dismiss();
+
                                 }
                             }, 3000);
                 }
@@ -158,9 +159,10 @@ public class SignupActivity extends AppCompatActivity {
         NCMBUser.requestAuthenticationMailInBackground(email, new DoneCallback() {
             @Override
             public void done(NCMBException e) {
+                progressDialog.dismiss();
                 if (e != null) {
                     //リクエストに失敗した場合の処理
-                    onSignupFailed();
+                    onSignupFailed(e.getMessage());
                 } else {
                     new android.os.Handler().postDelayed(
                             new Runnable() {
@@ -169,7 +171,7 @@ public class SignupActivity extends AppCompatActivity {
                                     // depending on success
                                     onSignupSuccess();
                                     // onSignupFailed();
-                                    progressDialog.dismiss();
+
                                 }
                             }, 3000);
                 }

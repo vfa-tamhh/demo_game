@@ -9,5 +9,6 @@ public class SnackeApplication extends Application {
     public void onCreate() {
         super.onCreate();
         NCMB.initialize(this, "APPLICATION_KEY", "CLIENT_KEY");
+        NCMB.setTimeout(90000);
     }
 }

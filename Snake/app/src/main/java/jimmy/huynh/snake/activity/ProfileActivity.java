@@ -1,6 +1,7 @@
 package jimmy.huynh.snake.activity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -48,6 +49,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     Button btnUpdate;
     @BindView(R.id.btn_reset_pass)
     Button btnResetPass;
+    private ProgressDialog progressDialog;
 
     private String public_path = "https://mbaas.api.nifcloud.com/2013-09-01/applications/{1}/publicFiles/{2}";
 
@@ -59,6 +61,10 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
 
         public_path = public_path.replace("{1}", getString(R.string.APPLICATION_ID));
         public_path = public_path.replace("{2}", NCMBUser.getCurrentUser().getUserName() + ".jpg");
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Loading...");
         //Initial view here...
         initView();
 
@@ -99,11 +105,13 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void resetPassword() {
+        progressDialog.show();
         final NCMBUser ncmbUser = NCMBUser.getCurrentUser();
         if (null != ncmbUser.getMailAddress()) {
             NCMBUser.requestPasswordResetInBackground(ncmbUser.getMailAddress(), new DoneCallback() {
                 @Override
                 public void done(NCMBException error) {
+                    progressDialog.dismiss();
                     if(error != null ){
                         Toast.makeText(getBaseContext(), "Reset password error: " + error.getMessage(), Toast.LENGTH_LONG).show();
                     } else {
@@ -113,12 +121,14 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 }
             });
         } else {
+            progressDialog.dismiss();
             Toast.makeText(getBaseContext(), "Your account do not have email address.", Toast.LENGTH_LONG).show();
         }
 
     }
 
     private void initView() {
+        progressDialog.show();
         NCMBUser ncmbUser = NCMBUser.getCurrentUser();
         if (null != ncmbUser.getUserName()) {
             edtUserName.setText(ncmbUser.getUserName());
@@ -131,6 +141,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         if (null != thumb) {
             loadImage(thumb);
         }
+        progressDialog.dismiss();
     }
 
     private void loadImage(String img) {
@@ -144,6 +155,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void updateInfo() {
+        progressDialog.show();
         NCMBUser ncmbUser = NCMBUser.getCurrentUser();
         ncmbUser.setMailAddress(edtMail.getText().toString());
         ncmbUser.setUserName(edtUserName.getText().toString());
@@ -151,6 +163,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         ncmbUser.saveInBackground(new DoneCallback() {
             @Override
             public void done(NCMBException e) {
+                progressDialog.dismiss();
                 if (e != null) {
                     Toast.makeText(getBaseContext(), "Update info error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 } else {
@@ -212,11 +225,13 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void uploadFile(String name, final byte[] data) {
+        progressDialog.show();
         try {
             NCMBFile ncmbFile = new NCMBFile(name, data, new NCMBAcl());
             ncmbFile.saveInBackground(new DoneCallback() {
                 @Override
                 public void done(NCMBException e) {
+                    progressDialog.dismiss();
                     if (e != null) {
                         //失敗
                         Toast.makeText(ProfileActivity.this, "Can not upload file: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -244,6 +259,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 }
             });
         } catch (NCMBException e) {
+            progressDialog.dismiss();
             e.printStackTrace();
         }
     }
