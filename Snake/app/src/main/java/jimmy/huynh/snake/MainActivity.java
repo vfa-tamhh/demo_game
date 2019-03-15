@@ -16,6 +16,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.gson.Gson;
 import com.nifcloud.mbaas.core.NCMBException;
+import com.nifcloud.mbaas.core.NCMBPush;
 import com.nifcloud.mbaas.core.NCMBUser;
 
 import jimmy.huynh.snake.activity.BestScoreActivity;
@@ -147,6 +148,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
         if (NCMBUser.getCurrentUser() != null) {
             initWithUser(NCMBUser.getCurrentUser());
+            //リッチプッシュ通知の表示
+            NCMBPush.richPushHandler(this, getIntent());
+
+            //リッチプッシュを再表示させたくない場合はintentからURLを削除します
+            getIntent().removeExtra("com.nifcloud.mbaas.RichUrl");
         }
     }
 }

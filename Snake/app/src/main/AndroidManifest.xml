@@ -38,6 +38,9 @@
             android:name="notificationOverlap"
             android:value="0" />
 
+        <!-- カスタムダイアログプッシュを利用する場合のみ背景画像の設定 -->
+        <meta-data android:name="dialogPushBackgroundImage" android:resource="@drawable/balloon"/>
+
         <activity android:name=".activity.SnakeActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -63,6 +66,13 @@
         </service>
 
         <activity android:name=".activity.ProfileActivity"></activity>
+        <activity
+            android:name="com.nifcloud.mbaas.core.NCMBDialogActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Wallpaper.NoTitleBar">
+        </activity>
     </application>
 
 </manifest>
